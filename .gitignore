@@ -1,0 +1,29 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.jar
+*.war
+*.ear
+
+# Spring Boot
+*.pid
+application-*.properties
+application-*.yml
+!application-docker.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/settings.json
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.markdown-collab/
+
+# Logs
+logs/
+*.log
