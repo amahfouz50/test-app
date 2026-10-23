@@ -35,8 +35,11 @@ pipeline {
             steps {
                 echo "🧹 Stopping running container and removing old image..."
                 sh '''
-                    # Stop and remove existing container
-                    docker compose down --remove-orphans || true
+                    # Force stop and remove container by name if running (handles any previous project names)
+                    docker rm -f ${CONTAINER} || true
+                    
+                    # Stop and remove compose project resources
+                    docker compose -p ${APP_NAME} down --remove-orphans || true
                     
                     # Remove old image if exists
                     if docker image inspect ${IMAGE_NAME} > /dev/null 2>&1; then
@@ -52,14 +55,14 @@ pipeline {
         stage('Build New Docker Image') {
             steps {
                 echo "🐳 Building new Docker image with docker compose..."
-                sh 'docker compose build --no-cache'
+                sh 'docker compose -p ${APP_NAME} build --no-cache'
             }
         }
 
         stage('Run Docker Compose') {
             steps {
                 echo "🚀 Starting container with docker compose up -d..."
-                sh 'docker compose up -d'
+                sh 'docker compose -p ${APP_NAME} up -d'
             }
         }
 
@@ -82,7 +85,7 @@ pipeline {
                         sleep 5
                     done
                     echo "❌ Healthcheck failed!"
-                    docker compose logs --tail=50
+                    docker compose -p ${APP_NAME} logs --tail=50
                     exit 1
                 '''
             }
@@ -95,7 +98,7 @@ pipeline {
         }
         failure {
             echo "❌ Pipeline failed! Inspecting container logs..."
-            sh 'docker compose logs --tail=50 || true'
+            sh 'docker compose -p ${APP_NAME} logs --tail=50 || true'
         }
     }
 }

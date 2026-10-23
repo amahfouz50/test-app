@@ -5,6 +5,7 @@
 #   Logs          : docker compose logs -f
 #   Stop          : docker compose down
 # =============================================================================
+name: test-app
 
 services:
 
