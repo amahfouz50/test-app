@@ -72,7 +72,7 @@ pipeline {
                 echo "🩺 Verifying application health check on port 7012..."
                 sh '''
                     echo "Waiting for Spring Boot to start up..."
-                    sleep 12
+                    sleep 15
 
                     for i in $(seq 1 15); do
                         HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://host.docker.internal:7012/actuator/health || true)
