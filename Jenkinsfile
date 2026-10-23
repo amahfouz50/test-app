@@ -25,10 +25,10 @@ pipeline {
             }
         }
 
-        stage('Clean & Test (Maven)') {
+        stage('Clean, Test & Package (Maven)') {
             steps {
-                echo "🔨 Cleaning and running unit tests with Maven..."
-                sh 'mvn clean test -B --no-transfer-progress'
+                echo "🔨 Compiling, testing, and packaging JAR with Maven..."
+                sh 'mvn clean package -B --no-transfer-progress'
             }
         }
 
@@ -55,8 +55,8 @@ pipeline {
 
         stage('Build New Docker Image') {
             steps {
-                echo "🐳 Building new Docker image with docker compose..."
-                sh 'docker compose -p ${APP_NAME} build --no-cache'
+                echo "🐳 Building new Docker image with docker compose (fast packaging)..."
+                sh 'docker compose -p ${APP_NAME} build'
             }
         }
 
