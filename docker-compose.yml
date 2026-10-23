@@ -12,6 +12,7 @@ services:
   # test-app Service
   # ---------------------------------------------------------------------------
   test-app:
+    image: test-app:latest
     build:
       context: .
       dockerfile: Dockerfile
