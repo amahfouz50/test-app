@@ -13,8 +13,15 @@ pipeline {
         CONTAINER       = 'shms-test-app'
         GIT_REPO_URL    = 'https://github.com/amahfouz50/test-app.git'
         BRANCH_NAME     = 'develop'
-        NOTIFICATION_TO = 'ahmedmahfouz13@gmail.com, ahmedmahfouz1993@gmail.com'
+        NOTIFICATION_TO = 'ahmedmahfouz13@gmail.com, ahmedmahfouz1993@gmail.com, ahmahfouz.c@stc.com.sa'
         MAVEN_OPTS      = '-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xmx1024m'
+    }
+
+    triggers {
+        // Automatically checks develop branch every 2 minutes for new pushes (ideal for local Docker Jenkins)
+        pollSCM('H/2 * * * *')
+        // Automatically triggers instantly when GitHub Webhook pushes an event
+        githubPush()
     }
 
     stages {
