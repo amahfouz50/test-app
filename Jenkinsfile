@@ -72,24 +72,18 @@ pipeline {
                 echo "🩺 Verifying application health check on port 7012..."
                 sh '''
                     echo "Waiting for Spring Boot to start up..."
-                    sleep 10
-                    TARGET_HOST="host.docker.internal"
-                    
-                    # Check if host.docker.internal or localhost is reachable
-                    if ! curl -s -o /dev/null http://${TARGET_HOST}:7012/actuator/health; then
-                        TARGET_HOST="localhost"
-                    fi
+                    sleep 12
 
-                    for i in $(seq 1 12); do
-                        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://${TARGET_HOST}:7012/actuator/health || true)
+                    for i in $(seq 1 15); do
+                        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://host.docker.internal:7012/actuator/health || true)
                         if [ "$HTTP_CODE" = "200" ]; then
-                            echo "✅ Application is HEALTHY (HTTP 200) on ${TARGET_HOST}:7012!"
+                            echo "✅ Application is HEALTHY (HTTP 200) on host.docker.internal:7012!"
                             echo "Response from /api/test:"
-                            curl -s http://${TARGET_HOST}:7012/api/test
+                            curl -s http://host.docker.internal:7012/api/test
                             echo ""
                             exit 0
                         fi
-                        echo "Healthcheck attempt $i/12 returned HTTP $HTTP_CODE, waiting 5s..."
+                        echo "Healthcheck attempt $i/15 returned HTTP $HTTP_CODE, waiting 5s..."
                         sleep 5
                     done
                     echo "❌ Healthcheck failed!"
