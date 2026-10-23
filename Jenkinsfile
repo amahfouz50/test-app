@@ -14,6 +14,7 @@ pipeline {
         GIT_REPO_URL    = 'https://github.com/amahfouz50/test-app.git'
         BRANCH_NAME     = 'develop'
         NOTIFICATION_TO = 'ahmedmahfouz13@gmail.com, ahmedmahfouz1993@gmail.com'
+        MAVEN_OPTS      = '-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xmx1024m'
     }
 
     stages {
@@ -25,10 +26,10 @@ pipeline {
             }
         }
 
-        stage('Clean, Test & Package (Maven)') {
+        stage('Compile, Test & Package (Maven)') {
             steps {
-                echo "🔨 Compiling, testing, and packaging JAR with Maven..."
-                sh 'mvn clean package -B --no-transfer-progress'
+                echo "🔨 Compiling, testing, and packaging JAR with Maven (Fast & Multi-threaded)..."
+                sh 'mvn package -B --no-transfer-progress -T 1C -DargLine="-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xmx512m"'
             }
         }
 
