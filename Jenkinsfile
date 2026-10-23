@@ -8,11 +8,12 @@ pipeline {
     }
 
     environment {
-        APP_NAME     = 'test-app'
-        IMAGE_NAME   = 'test-app:latest'
-        CONTAINER    = 'shms-test-app'
-        GIT_REPO_URL = 'https://github.com/amahfouz50/test-app.git'
-        BRANCH_NAME  = 'develop'
+        APP_NAME        = 'test-app'
+        IMAGE_NAME      = 'test-app:latest'
+        CONTAINER       = 'shms-test-app'
+        GIT_REPO_URL    = 'https://github.com/amahfouz50/test-app.git'
+        BRANCH_NAME     = 'develop'
+        NOTIFICATION_TO = 'ahmedmahfouz13@gmail.com, ahmedmahfouz1993@gmail.com'
     }
 
     stages {
@@ -102,10 +103,57 @@ pipeline {
     post {
         success {
             echo "🎉 Pipeline finished successfully! ${APP_NAME} is deployed and healthy on http://localhost:7012"
+            script {
+                try {
+                    emailext (
+                        to: env.NOTIFICATION_TO,
+                        subject: "✅ SUCCESS: Pipeline [${env.JOB_NAME}] - Build #${env.BUILD_NUMBER}",
+                        mimeType: 'text/html',
+                        body: """
+                            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #4CAF50; border-radius: 8px;">
+                                <h2 style="color: #4CAF50;">✅ Pipeline Build Succeeded!</h2>
+                                <p><b>Project:</b> ${env.JOB_NAME}</p>
+                                <p><b>Build Number:</b> #${env.BUILD_NUMBER}</p>
+                                <p><b>Branch:</b> ${env.BRANCH_NAME}</p>
+                                <p><b>Status:</b> SUCCESS</p>
+                                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                                <p><b>App URL:</b> <a href="http://localhost:7012">http://localhost:7012</a></p>
+                                <p><b>Health Check:</b> <a href="http://localhost:7012/actuator/health">http://localhost:7012/actuator/health</a></p>
+                                <p><b>Build Details:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                            </div>
+                        """
+                    )
+                } catch (Exception e) {
+                    echo "⚠️ Email notification failed (verify SMTP configuration in Jenkins): ${e.message}"
+                }
+            }
         }
         failure {
             echo "❌ Pipeline failed! Inspecting container logs..."
             sh 'docker compose -p ${APP_NAME} logs --tail=50 || true'
+            script {
+                try {
+                    emailext (
+                        to: env.NOTIFICATION_TO,
+                        subject: "❌ FAILURE: Pipeline [${env.JOB_NAME}] - Build #${env.BUILD_NUMBER}",
+                        mimeType: 'text/html',
+                        body: """
+                            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #F44336; border-radius: 8px;">
+                                <h2 style="color: #F44336;">❌ Pipeline Build Failed!</h2>
+                                <p><b>Project:</b> ${env.JOB_NAME}</p>
+                                <p><b>Build Number:</b> #${env.BUILD_NUMBER}</p>
+                                <p><b>Branch:</b> ${env.BRANCH_NAME}</p>
+                                <p><b>Status:</b> FAILED</p>
+                                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                                <p><b>Build Details:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                                <p><b>Console Output:</b> <a href="${env.BUILD_URL}console">${env.BUILD_URL}console</a></p>
+                            </div>
+                        """
+                    )
+                } catch (Exception e) {
+                    echo "⚠️ Email notification failed (verify SMTP configuration in Jenkins): ${e.message}"
+                }
+            }
         }
     }
 }
