@@ -72,12 +72,19 @@ pipeline {
                 sh '''
                     echo "Waiting for Spring Boot to start up..."
                     sleep 10
+                    TARGET_HOST="host.docker.internal"
+                    
+                    # Check if host.docker.internal or localhost is reachable
+                    if ! curl -s -o /dev/null http://${TARGET_HOST}:7012/actuator/health; then
+                        TARGET_HOST="localhost"
+                    fi
+
                     for i in $(seq 1 12); do
-                        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:7012/actuator/health || true)
+                        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://${TARGET_HOST}:7012/actuator/health || true)
                         if [ "$HTTP_CODE" = "200" ]; then
-                            echo "✅ Application is HEALTHY (HTTP 200)!"
+                            echo "✅ Application is HEALTHY (HTTP 200) on ${TARGET_HOST}:7012!"
                             echo "Response from /api/test:"
-                            curl -s http://localhost:7012/api/test
+                            curl -s http://${TARGET_HOST}:7012/api/test
                             echo ""
                             exit 0
                         fi
